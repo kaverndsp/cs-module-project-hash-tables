@@ -1,3 +1,6 @@
+from linkedlist import Node, LinkedList
+
+
 class HashTableEntry:
     """
     Linked List hash table key/value pair
@@ -81,8 +84,15 @@ class HashTable:
 
         Implement this.
         """
-        index = self.hash_index(key)
-        self.storage[index] = value
+        # index = self.hash_index(key)
+        # self.storage[index] = value
+        key_hash = self.get(key)
+        key_value = [key, value]
+
+        if self.storage[key_hash] is None:
+            self.storage[key_hash] = list([key_value])
+
+            self.storage[key_hash]. append(key_value)
 
     def delete(self, key):
         """
@@ -106,9 +116,15 @@ class HashTable:
 
         Implement this.
         """
-        index = self.hash_index(key)
-        value = self.storage[index]
-        return value
+        # index = self.hash_index(key)
+        # value = self.storage[index]
+        # return value
+        hash = 0
+        for char in str(key):
+            hash += ord(char)
+            if char is None:
+                return None
+        return hash % self.capacity
 
     def resize(self, new_capacity):
         """
@@ -117,7 +133,6 @@ class HashTable:
 
         Implement this.
         """
-        # Your code here
 
 
 if __name__ == "__main__":
