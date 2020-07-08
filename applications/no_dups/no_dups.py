@@ -1,6 +1,5 @@
 def no_dups(s):
-    # Your code here
-
+    cache = {}
 
 
 if __name__ == "__main__":
