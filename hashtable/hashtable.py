@@ -1,7 +1,11 @@
+from linkedlist import Node, LinkedList
+
+
 class HashTableEntry:
     """
     Linked List hash table key/value pair
     """
+
     def __init__(self, key, value):
         self.key = key
         self.value = value
@@ -21,8 +25,10 @@ class HashTable:
     """
 
     def __init__(self, capacity):
-        # Your code here
-
+        self.capacity = capacity
+        self.storage = [LinkedList()] * capacity
+        self.count = 0
+        self.resizeWhenLoadFactorGreaterThan = 0.7
 
     def get_num_slots(self):
         """
@@ -34,8 +40,7 @@ class HashTable:
 
         Implement this.
         """
-        # Your code here
-
+        return self.capacity
 
     def get_load_factor(self):
         """
@@ -43,8 +48,7 @@ class HashTable:
 
         Implement this.
         """
-        # Your code here
-
+        return self.count / self.capacity
 
     def fnv1(self, key):
         """
@@ -53,8 +57,12 @@ class HashTable:
         Implement this, and/or DJB2.
         """
 
-        # Your code here
-
+        hval = 0x811c9dc5
+        fnv_32_prime = 0x01000193
+        for s in key:
+            hval = hval ^ ord(s)
+            hval = (hval * fnv_32_prime) % self.capacity
+        return hval
 
     def djb2(self, key):
         """
@@ -62,15 +70,17 @@ class HashTable:
 
         Implement this, and/or FNV-1.
         """
-        # Your code here
-
+        hash = 5381
+        for c in key:
+            hash = (hash * 33) + ord(c)
+        return hash
 
     def hash_index(self, key):
         """
         Take an arbitrary key and return a valid integer index
         between within the storage capacity of the hash table.
         """
-        #return self.fnv1(key) % self.capacity
+        # return self.fnv1(key) % self.capacity
         return self.djb2(key) % self.capacity
 
     def put(self, key, value):
@@ -81,8 +91,20 @@ class HashTable:
 
         Implement this.
         """
-        # Your code here
+        for index in self.storage:
+            node_with_key = self.__find_node_with_key_in_ll(index, key)
+            if node_with_key is not None:
+                node_with_key.value.value = value
+                return
 
+        if self.get_load_factor() > self.resizeWhenLoadFactorGreaterThan:
+            self.resize(self.capacity * 2)
+
+        node = Node(HashTableEntry(key, value))
+        index = self.fnv1(key)
+        self.storage[index].insert_at_head(node)
+
+        self.count += 1
 
     def delete(self, key):
         """
@@ -92,8 +114,11 @@ class HashTable:
 
         Implement this.
         """
-        # Your code here
-
+        index = self.hash_index(key)
+        if self.storage[index] == None:
+            return
+        else:
+            self.storage[index] = None
 
     def get(self, key):
         """
@@ -103,8 +128,15 @@ class HashTable:
 
         Implement this.
         """
-        # Your code here
-
+        # index = self.hash_index(key)
+        # value = self.storage[index]
+        # return value
+        hash = 0
+        for char in str(key):
+            hash += ord(char)
+            if char is None:
+                return None
+        return hash % self.capacity
 
     def resize(self, new_capacity):
         """
@@ -113,8 +145,31 @@ class HashTable:
 
         Implement this.
         """
-        # Your code here
 
+        self.capacity = new_capacity
+
+        new_data = []
+
+        for ll_at_index in self.data:
+            cur = ll_at_index.head
+            while cur is not None:
+                kv = {}
+                kv["key"] = cur.value.key
+                kv["value"] = cur.value.value
+                new_data.append(kv)
+                cur = cur.next
+
+        self.data = [LinkedList()] * self.capacity
+        for kv in new_data:
+            self.put(kv["key"], kv["value"])
+
+     def __find_node_with_key_in_ll(self, linkedlist, key): 
+        cur = linkedlist.head
+        while cur is not None:
+            if cur.value.key == key:
+                return cur
+            cur = cur.next
+        return None
 
 
 if __name__ == "__main__":
