@@ -26,7 +26,9 @@ class HashTable:
 
     def __init__(self, capacity):
         self.capacity = capacity
-        self.storage = [None] * capacity
+        self.storage = [LinkedList()] * capacity
+        self.count = 0
+        self.resizeWhenLoadFactorGreaterThan = 0.7
 
     def get_num_slots(self):
         """
@@ -46,7 +48,7 @@ class HashTable:
 
         Implement this.
         """
-        # Your code here
+        return self.count / self.capacity
 
     def fnv1(self, key):
         """
@@ -55,7 +57,12 @@ class HashTable:
         Implement this, and/or DJB2.
         """
 
-        # Your code here
+        hval = 0x811c9dc5
+        fnv_32_prime = 0x01000193
+        for s in key:
+            hval = hval ^ ord(s)
+            hval = (hval * fnv_32_prime) % self.capacity
+        return hval
 
     def djb2(self, key):
         """
@@ -84,15 +91,20 @@ class HashTable:
 
         Implement this.
         """
-        # index = self.hash_index(key)
-        # self.storage[index] = value
-        key_hash = self.get(key)
-        key_value = [key, value]
+        for index in self.storage:
+            node_with_key = self.__find_node_with_key_in_ll(index, key)
+            if node_with_key is not None:
+                node_with_key.value.value = value
+                return
 
-        if self.storage[key_hash] is None:
-            self.storage[key_hash] = list([key_value])
+        if self.get_load_factor() > self.resizeWhenLoadFactorGreaterThan:
+            self.resize(self.capacity * 2)
 
-            self.storage[key_hash]. append(key_value)
+        node = Node(HashTableEntry(key, value))
+        index = self.fnv1(key)
+        self.storage[index].insert_at_head(node)
+
+        self.count += 1
 
     def delete(self, key):
         """
@@ -133,6 +145,31 @@ class HashTable:
 
         Implement this.
         """
+
+        self.capacity = new_capacity
+
+        new_data = []
+
+        for ll_at_index in self.data:
+            cur = ll_at_index.head
+            while cur is not None:
+                kv = {}
+                kv["key"] = cur.value.key
+                kv["value"] = cur.value.value
+                new_data.append(kv)
+                cur = cur.next
+
+        self.data = [LinkedList()] * self.capacity
+        for kv in new_data:
+            self.put(kv["key"], kv["value"])
+
+     def __find_node_with_key_in_ll(self, linkedlist, key): 
+        cur = linkedlist.head
+        while cur is not None:
+            if cur.value.key == key:
+                return cur
+            cur = cur.next
+        return None
 
 
 if __name__ == "__main__":

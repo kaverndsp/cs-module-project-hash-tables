@@ -1,6 +1,10 @@
 def no_dups(s):
     cache = {}
 
+    if s not in cache:
+        cache = s
+        print("this is in cache", cache)
+
 
 if __name__ == "__main__":
     print(no_dups(""))
